@@ -91,4 +91,4 @@ Meski begitu, eksperimen ini membuktikan bahwa konsep inti machine learning — 
 
 ## Catatan
 
-Proyek ini bukan alternatif untuk framework ML modern. Ini adalah **latihan pemahaman** — membangun Tensor, computational graph, forward pass, hingga backpropagation dari tingkat paling dasar, di atas hardware yang paling terbatas yang tersedia, justru untuk memaksa pemahaman yang benar-benar fundamental.
+Proyek ini bukan alternatif untuk framework ML modern. Ini adalah latihan pemahaman untuk membangun Tensor, computational graph, forward pass, hingga backpropagation dari tingkat paling dasar, di atas hardware yang paling terbatas yang tersedia, justru untuk memaksa pemahaman yang benar-benar fundamental.
