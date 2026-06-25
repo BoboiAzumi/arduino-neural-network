@@ -1,11 +1,26 @@
-# Artificial Neural Network pada Arduino Uno
-![Platform](https://img.shields.io/badge/platform-Arduino%20Uno-blue)
-![Programming Language](https://img.shields.io/badge/C++-blue)
-## Ringkasan
-Proyek ini merupakan langkah eksperimental untuk menjalankan algoritma Jaringan Syaraf Tiruan pada perangkat mikrokontroler seperti Arduino Uno. Tujuan proyek ini adalah untuk menguji seberapa mungkin perangkat mikrokontroler mampu menjalankan algoritma Jaringan Syaraf Tiruan.
+# Artificial Neural Network on Arduino Uno
 
-## Rincian
-Proyek ini menggunakan struktur data graph komputasional untuk menghitung setiap langkah operasi Jaringan Syaraf Tiruan serta membangun pelacakan diferensiasi untuk mencatat gradien sehingga memudahkan proses backpropagation.
+![Platform](https://img.shields.io/badge/platform-Arduino%20Uno-00979D?logo=arduino&logoColor=white)
+![Language](https://img.shields.io/badge/language-C++-00599C?logo=cplusplus&logoColor=white)
+![Status](https://img.shields.io/badge/status-experimental-orange)
+![Memory](https://img.shields.io/badge/SRAM-2KB-critical)
+
+> Membangun autograd engine dan jaringan syaraf tiruan dari nol — langsung di atas mikrokontroler 8-bit dengan 2 KB SRAM.
+
+---
+
+## Ringkasan
+
+Proyek ini merupakan eksperimen untuk menjalankan jaringan syaraf tiruan (JST) sepenuhnya di atas Arduino Uno — tanpa library machine learning eksternal, tanpa floating-point unit, dan dengan memori yang sangat terbatas.
+
+Tujuannya bukan efisiensi, melainkan pemahaman: seberapa jauh konsep dasar deep learning dapat diturunkan ke perangkat keras paling sederhana sekalipun?
+
+---
+
+## Cara Kerja
+
+Inti dari proyek ini adalah **computational graph** — struktur data yang merepresentasikan seluruh alur komputasi JST sebagai graph terarah.
+
 ```
 (a)----
         \
@@ -14,39 +29,66 @@ Proyek ini menggunakan struktur data graph komputasional untuk menghitung setiap
 (b)----
 
 c = a * b
-a.grad = c.grad * b
-b.grad = c.grad * a
-```
-Setiap node diwakili oleh objek Tensor yang berisikan properti penting berupa _value untuk menyimpan nilai hasil komputasi dan _grad untuk menyimpan nilai gradien yang diperoleh selama proses backpropagation. Selain itu, setiap Tensor juga menyimpan referensi ke node-node sebelumnya yang digunakan untuk membentuk graph komputasional. Sehingga ketika operasi matematika dilakukan, sistem tidak hanya menghitung nilai hasil operasi tetapi juga membangun hubungan antar node sehingga seluruh proses perhitungan dapat direpresentasikan sebagai graph terarah.
-
-Sebagai contoh, operasi:
-
-```
-c = a * b
+∂c/∂a = b  →  a.grad += c.grad * b
+∂c/∂b = a  →  b.grad += c.grad * a
 ```
 
-akan menghasilkan node baru c yang menyimpan nilai hasil perkalian serta referensi ke node a dan b. Saat proses backpropagation dijalankan, gradien akan disebarkan dari node output menuju seluruh node yang terhubung berdasarkan aturan turunan masing-masing operasi.
+Setiap operasi menghasilkan node baru yang menyimpan nilainya sekaligus referensi ke node-node sebelumnya. Ketika backpropagation dijalankan, gradien mengalir mundur melalui seluruh graph mengikuti aturan chain rule — sepenuhnya secara otomatis.
 
-Implementasi Jaringan Syaraf Tiruan dibangun menggunakan beberapa komponen utama, yaitu layer, neuron, serta algoritma optimisasi berbasis gradient descent. Seluruh proses forward propagation dan backpropagation dilakukan secara manual tanpa menggunakan pustaka machine learning eksternal. Sebagai pengujian awal, model digunakan untuk mempelajari regresi linear yang merupakan salah satu permasalahan klasik dalam Jaringan Syaraf Tiruan. Pengujian ini bertujuan untuk memverifikasi bahwa proses perhitungan gradien dan pembaruan bobot telah berjalan dengan benar pada lingkungan Arduino Uno.
+### Komponen Utama
 
-## Batasan
-Karena Arduino Uno hanya memiliki 2 KB SRAM, pengelolaan memori menjadi aspek yang sangat penting. Setiap objek Tensor yang dibuat selama pembentukan graph komputasional dikelola dengan hati-hati agar penggunaan memori tetap berada dalam batas yang tersedia dan tidak menyebabkan kegagalan program akibat kehabisan memori.
+Setiap node direpresentasikan oleh objek **`Tensor`** dengan dua properti inti:
 
-## Arsitektur
-<img width="2048" height="926" alt="nn" src="https://github.com/user-attachments/assets/7c0890dd-f361-455f-96d5-fcb091cfae54" />
-Arsitektur yang digunakan pada proyek ini menggunakan 1 hidden layer dengan 2 neuron dan output layer dengan 1 neuron.
+| Properti | Fungsi |
+|---|---|
+| `_value` | Menyimpan hasil komputasi forward pass |
+| `_grad` | Menyimpan gradien yang diperoleh saat backpropagation |
 
-## Hasil
-### Pengujian dengan 100 Epochs
-<img width="817" height="947" alt="Cuplikan layar 2026-06-24 225429" src="https://github.com/user-attachments/assets/15467b42-b908-4f4c-b2e7-61db464a1eff" />
+JST dibangun dari tiga lapisan abstraksi: **Tensor → Neuron → Layer**, dengan optimisasi berbasis gradient descent yang diimplementasikan seluruhnya secara manual.
 
-### Pengujian dengan 1000 Epochs
-<img width="803" height="926" alt="Cuplikan layar 2026-06-24 221136" src="https://github.com/user-attachments/assets/487738de-a804-436f-a871-ccb7d0994187" />
+---
+
+## Arsitektur Model
+
+<img width="2048" height="926" alt="Arsitektur JST" src="https://github.com/user-attachments/assets/7c0890dd-f361-455f-96d5-fcb091cfae54" />
+
+Model yang digunakan pada pengujian ini memiliki arsitektur minimal:
+- **Input layer** — menerima fitur input
+- **Hidden layer** — 2 neuron dengan fungsi aktivasi
+- **Output layer** — 1 neuron untuk prediksi regresi
+
+---
+
+## Hasil Pengujian
+
+Pengujian dilakukan pada permasalahan **regresi linear** untuk memverifikasi bahwa alur forward pass, gradient computation, dan weight update berjalan benar di lingkungan Arduino Uno.
+
+### 100 Epochs
+<img width="817" height="947" alt="Hasil 100 Epochs" src="https://github.com/user-attachments/assets/15467b42-b908-4f4c-b2e7-61db464a1eff" />
+
+### 1000 Epochs
+<img width="803" height="926" alt="Hasil 1000 Epochs" src="https://github.com/user-attachments/assets/487738de-a804-436f-a871-ccb7d0994187" />
+
+Model menunjukkan konvergensi yang konsisten seiring bertambahnya epoch, membuktikan bahwa mekanisme gradient descent berfungsi dengan benar meski berjalan di atas prosesor 16 MHz dengan memori 2 KB.
+
+---
+
+## Batasan Memori
+
+Arduino Uno hanya memiliki **2 KB SRAM** — kira-kira cukup untuk menyimpan 500 bilangan bulat 32-bit. Ini menjadi constraint paling krusial dalam proyek ini.
+
+Setiap `Tensor` dalam graph membutuhkan alokasi heap. Tanpa pengelolaan memori yang cermat, program akan crash akibat heap corruption atau stack overflow bahkan sebelum forward pass selesai. Seluruh siklus hidup objek — alokasi, penggunaan, dan dealokasi — dikelola secara eksplisit untuk memastikan footprint memori tetap dalam batas yang tersedia.
+
+---
 
 ## Kesimpulan
-Membangun sebuah algoritma Jaringan Syaraf Tiruan pada Arduino Uno sangat mungkin dilakukan, namun dengan banyak keterbatasan yang krusial terutama pada batasan memori yang hanya memiliki 2 KB SRAM. 
 
-Meskipun ukuran model yang dapat dijalankan jauh lebih kecil dibandingkan implementasi pada komputer modern, pendekatan ini membuktikan bahwa konsep dasar pembelajaran mesin tetap dapat diterapkan pada mikrokontroler 8-bit. Hasil eksperimen ini juga memberikan gambaran mengenai tantangan utama dalam pengembangan kecerdasan buatan pada perangkat embedded, seperti keterbatasan RAM, kapasitas penyimpanan program, serta efisiensi penggunaan memori selama pembentukan graph komputasional.
+Menjalankan JST di Arduino Uno **sangat mungkin dilakukan**, namun dengan batasan yang tidak bisa diabaikan. Ukuran model yang dapat berjalan jauh lebih kecil dari standar modern, dan setiap byte memori harus diperhitungkan.
+
+Meski begitu, eksperimen ini membuktikan bahwa konsep inti machine learning — autograd, backpropagation, gradient descent — dapat diturunkan ke mikrokontroler 8-bit tanpa bantuan framework apapun. Lebih dari sekadar hasil teknisnya, proses membangun setiap komponen dari nol memberikan pemahaman yang jauh lebih dalam tentang cara kerja JST dibandingkan sekadar menggunakan PyTorch atau TensorFlow.
+
+---
 
 ## Catatan
-Proyek ini tidak ditujukan untuk menggantikan framework pembelajaran mesin modern, melainkan sebagai sarana eksplorasi dan pembelajaran untuk memahami cara kerja internal Jaringan Syaraf Tiruan dari tingkat paling dasar. Dengan membangun seluruh komponen dari awal, mulai dari Tensor, graph komputasional, propagasi maju (forward propagation), hingga propagasi balik (backpropagation), proses pembelajaran menjadi lebih transparan dan mudah dipahami dibandingkan hanya menggunakan pustaka yang sudah jadi.
+
+Proyek ini bukan alternatif untuk framework ML modern. Ini adalah **latihan pemahaman** — membangun Tensor, computational graph, forward pass, hingga backpropagation dari tingkat paling dasar, di atas hardware yang paling terbatas yang tersedia, justru untuk memaksa pemahaman yang benar-benar fundamental.
