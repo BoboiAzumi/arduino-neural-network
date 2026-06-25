@@ -59,7 +59,7 @@ Model yang digunakan pada pengujian ini memiliki arsitektur minimal:
 | Hidden layer | Memiliki 2 neuron |
 | Output layer | Memiliki 1 neuron |
 
----
+Baik hidden layer maupun output layer, keduanya menggunakan fungsi aktivasi linear.
 
 ## Hasil Pengujian
 
