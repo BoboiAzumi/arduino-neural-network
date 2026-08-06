@@ -19,7 +19,7 @@ Tujuannya bukan efisiensi, melainkan pemahaman: seberapa jauh konsep dasar deep 
 
 ## Cara Kerja
 
-Inti dari proyek ini adalah **computational graph**, merupakan struktur data yang merepresentasikan seluruh alur komputasi JST sebagai graph terarah.
+Inti dari proyek ini adalah computational graph, merupakan struktur data yang merepresentasikan seluruh alur komputasi JST sebagai graph terarah.
 
 ```
 (a)----
@@ -37,14 +37,14 @@ Setiap operasi menghasilkan node baru yang menyimpan nilainya sekaligus referens
 
 ### Komponen Utama
 
-Setiap node direpresentasikan oleh objek **`Tensor`** dengan dua properti inti:
+Setiap node direpresentasikan oleh objek Tensor dengan dua properti inti:
 
 | Properti | Fungsi |
 |---|---|
 | `_value` | Menyimpan hasil komputasi forward pass |
 | `_grad` | Menyimpan gradien yang diperoleh saat backpropagation |
 
-JST dibangun dari tiga lapisan abstraksi: **Tensor → Neuron → Layer**, dengan optimisasi berbasis gradient descent yang diimplementasikan seluruhnya secara manual.
+JST dibangun dari tiga lapisan abstraksi: Tensor => Neuron => Layer, dengan optimisasi berbasis gradient descent yang diimplementasikan seluruhnya secara manual.
 
 ---
 
@@ -63,7 +63,7 @@ Baik hidden layer maupun output layer, keduanya menggunakan fungsi aktivasi line
 
 ## Hasil Pengujian
 
-Pengujian dilakukan pada permasalahan **regresi linear** untuk memverifikasi bahwa alur forward pass, gradient computation, dan weight update berjalan benar di lingkungan Arduino Uno.
+Pengujian dilakukan pada permasalahan regresi linear untuk memverifikasi bahwa alur forward pass, gradient computation, dan weight update berjalan benar di lingkungan Arduino Uno.
 
 ### 100 Epochs
 <img width="817" height="947" alt="Hasil 100 Epochs" src="https://github.com/user-attachments/assets/15467b42-b908-4f4c-b2e7-61db464a1eff" />
@@ -77,7 +77,7 @@ Model menunjukkan konvergensi yang konsisten seiring bertambahnya epoch, membukt
 
 ## Batasan Memori
 
-Arduino Uno hanya memiliki **2 KB SRAM** yang kira-kira cukup untuk menyimpan 500 bilangan bulat 32-bit. Ini menjadi batasan paling krusial dalam proyek ini.
+Arduino Uno hanya memiliki 2 KB SRAM yang kira-kira cukup untuk menyimpan 500 bilangan bulat 32-bit. Ini menjadi batasan paling krusial dalam proyek ini.
 
 Setiap `Tensor` dalam graph membutuhkan alokasi heap. Tanpa pengelolaan memori yang cermat, program akan mengalami crash akibat heap corruption atau stack overflow bahkan sebelum forward pass selesai. Seluruh siklus hidup objek seperti alokasi, penggunaan, dan dealokasi sepenuhnya dikelola secara eksplisit untuk memastikan footprint memori tetap dalam batas yang tersedia.
 
@@ -85,7 +85,7 @@ Setiap `Tensor` dalam graph membutuhkan alokasi heap. Tanpa pengelolaan memori y
 
 ## Kesimpulan
 
-Menjalankan JST di Arduino Uno **sangat mungkin dilakukan**, namun dengan batasan yang tidak bisa diabaikan. Ukuran model yang dapat berjalan jauh lebih kecil dari standar modern, dan setiap byte memori harus diperhitungkan.
+Menjalankan JST di Arduino Uno sangat mungkin dilakukan, namun dengan batasan yang tidak bisa diabaikan. Ukuran model yang dapat berjalan jauh lebih kecil dari standar modern, dan setiap byte memori harus diperhitungkan.
 
 Meski begitu, eksperimen ini membuktikan bahwa konsep inti machine learning seperti autograd, backpropagation, gradient descent dapat diturunkan ke mikrokontroler 8-bit tanpa bantuan framework apapun. Lebih dari sekadar hasil teknisnya, proses membangun setiap komponen dari nol memberikan pemahaman yang jauh lebih dalam tentang cara kerja JST dibandingkan sekadar menggunakan PyTorch atau TensorFlow.
 
