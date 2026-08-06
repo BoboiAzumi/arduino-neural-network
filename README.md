@@ -5,7 +5,7 @@
 ![Status](https://img.shields.io/badge/status-experimental-orange)
 ![Memory](https://img.shields.io/badge/SRAM-2KB-critical)
 
-> Membangun autograd engine dan jaringan syaraf tiruan dari nol langsung di atas mikrokontroler 8-bit dengan 2 KB SRAM.
+> Membangun autograd engine dan jaringan syaraf tiruan di atas mikrokontroler 8-bit dengan 2 KB SRAM.
 
 ---
 
